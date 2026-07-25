@@ -89,6 +89,10 @@ export default function AddTaskForm() {
             Tanggal jatuh tempo
           </label>
           <input id="tenggat-baru" type="date" name="due_date" className={inputCls} />
+                    <label className="sr-only" htmlFor="jam-baru">
+            Jam deadline (opsional)
+          </label>
+          <input id="jam-baru" type="time" name="due_time" className={inputCls} />
         </div>
       )}
     </form>

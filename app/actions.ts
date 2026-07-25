@@ -16,9 +16,10 @@ export async function addTask(formData: FormData) {
   const priority = Number(formData.get("priority")) || 2;
   const category = (formData.get("category") as string)?.trim() || "umum";
   const due_date = (formData.get("due_date") as string) || todayWIB();
+  const due_time = (formData.get("due_time") as string) || null;
 
   const supabase = createClient();
-  await supabase.from("tasks").insert({ title, priority, category, due_date });
+  await supabase.from("tasks").insert({ title, priority, category, due_date, due_time });
 
   // "layout" = refresh SEMUA halaman (Hari Ini & Semua Tugas),
   // karena kedua halaman menampilkan data tasks yang sama.
@@ -53,11 +54,30 @@ export async function updateTask(id: number, formData: FormData) {
   const category = (formData.get("category") as string)?.trim() || "umum";
   const priority = Number(formData.get("priority")) || 2;
   const due_date = (formData.get("due_date") as string) || null;
+  const due_time = (formData.get("due_time") as string) || null;
 
   const supabase = createClient();
+
+  const { data: lama } = await supabase
+    .from("tasks")
+    .select("due_date, due_time")
+    .eq("id", id)
+    .single();
+
+  const jamLama = lama?.due_time ? String(lama.due_time).slice(0, 5) : null;
+  const jadwalBerubah = lama?.due_date !== due_date || jamLama !== due_time;
+
   await supabase
     .from("tasks")
-    .update({ title, note, category, priority, due_date })
+    .update({
+      title,
+      note,
+      category,
+      priority,
+      due_date,
+      due_time,
+      ...(jadwalBerubah ? { reminded_d1: false, reminded_h5: false } : {}),
+    })
     .eq("id", id);
 
   revalidatePath("/", "layout");

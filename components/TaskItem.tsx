@@ -22,6 +22,7 @@ export type Task = {
   category: string | null;
   priority: number;
   due_date: string | null;
+  due_time: string | null;
   is_done: boolean;
 };
 
@@ -106,6 +107,16 @@ export default function TaskItem({ task }: { task: Task }) {
               defaultValue={task.due_date ?? ""}
               className={inputCls}
             />
+                        <label className="sr-only" htmlFor={`jam-${task.id}`}>
+              Jam deadline
+            </label>
+            <input
+              id={`jam-${task.id}`}
+              type="time"
+              name="due_time"
+              defaultValue={task.due_time?.slice(0, 5) ?? ""}
+              className={inputCls}
+            />
           </div>
           <div className="flex gap-2">
             <Button type="submit" className="min-h-[40px] px-3 py-1.5">
@@ -130,6 +141,7 @@ export default function TaskItem({ task }: { task: Task }) {
   const isOverdue = !task.is_done && !!task.due_date && task.due_date < today;
   const isDueToday = !task.is_done && task.due_date === today;
   const prio = PRIORITY[task.priority as 1 | 2 | 3] ?? PRIORITY[2];
+  const jam = task.due_time ? task.due_time.slice(0, 5) : null;
 
   return (
     <li className="group relative flex items-start gap-3 rounded-xl px-3 py-3 transition hover:bg-moss/50">
@@ -192,15 +204,16 @@ export default function TaskItem({ task }: { task: Task }) {
               <AlertCircle className="h-3 w-3" aria-hidden />
               Terlambat • {formatTanggal(task.due_date!)}
             </span>
-          ) : isDueToday ? (
+                    ) : isDueToday ? (
             <span className="flex items-center gap-1 text-amber">
               <Clock className="h-3 w-3" aria-hidden />
-              Hari ini
+              Hari ini{jam ? ` • ${jam}` : ""}
             </span>
           ) : task.due_date ? (
             <span className="flex items-center gap-1 text-ash">
               <CalendarDays className="h-3 w-3" aria-hidden />
               {formatTanggal(task.due_date)}
+              {jam ? ` • ${jam}` : ""}
             </span>
           ) : null}
         </div>
