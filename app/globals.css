@@ -2,26 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design tokens "Lime Orbit" — sumber kebenaran warna & font */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-background: #11110f;
+  --color-surface: #1c1d18;
+  --color-surface-active: #292b22;
+  --color-primary: #c7f36b;
+  --color-secondary: #a99bff;
+  --color-text-primary: #f4f1e8;
+  --color-text-secondary: #a8a89f;
+  --color-border: #393b31;
+  --color-danger: #ff6b64;
+  --color-warning: #f5b942;
+  --color-success: #65d6a6;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* Grain / noise sangat tipis di atas seluruh tampilan */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Focus ring konsisten — jangan pernah dihilangkan */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Hormati preferensi pengguna yang sensitif terhadap gerakan */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
