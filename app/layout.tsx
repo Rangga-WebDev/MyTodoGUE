@@ -9,7 +9,7 @@ const syne = Syne({ subsets: ["latin"], variable: "--font-display" });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
-  title: "Orbitask — ToDo Pribadi",
+  title: "TODOnya Rangga",
   description: "Kelola fokus, tugas, dan ritme harianmu dalam satu orbit.",
 };
 

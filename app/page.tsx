@@ -9,10 +9,10 @@ import { Orbit } from "lucide-react";
 
 function sapaan(): string {
   const jam = jamWIB();
-  if (jam < 11) return "Selamat pagi";
-  if (jam < 15) return "Selamat siang";
-  if (jam < 19) return "Selamat sore";
-  return "Selamat malam";
+  if (jam < 11) return "Selamat pagi MasBro";
+  if (jam < 15) return "Selamat siang MasBro";
+  if (jam < 19) return "Selamat sore MasBro";
+  return "Selamat malam MasBro";
 }
 
 function SectionHeading({

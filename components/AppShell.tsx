@@ -14,7 +14,7 @@ function Logo() {
         <Orbit className="h-4 w-4 text-lime" aria-hidden />
       </span>
       <span className="font-display text-lg font-bold tracking-wide">
-        Orbitask
+        JehaToDo
       </span>
     </span>
   );
@@ -33,7 +33,7 @@ export default function AppShell({
     <div className="mx-auto flex min-h-screen max-w-6xl">
       {/* ===== Sidebar (desktop) ===== */}
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-6 border-r border-line p-5 md:flex">
-        <Link href="/" aria-label="Beranda Orbitask">
+        <Link href="/" aria-label="Beranda Gue">
           <Logo />
         </Link>
 
@@ -80,7 +80,7 @@ export default function AppShell({
       {/* ===== Konten + header mobile ===== */}
       <div className="min-w-0 flex-1">
         <header className="flex items-center justify-between border-b border-line px-4 py-3 md:hidden">
-          <Link href="/" aria-label="Beranda Orbitask">
+          <Link href="/" aria-label="Beranda Gue">
             <Logo />
           </Link>
           <LogoutButton />

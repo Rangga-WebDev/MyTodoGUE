@@ -12,7 +12,6 @@ import {
   Orbit,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import ProgressRing from "@/components/ProgressRing";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -77,37 +76,19 @@ export default function LoginPage() {
             <Orbit className="h-4 w-4 text-lime" aria-hidden />
           </span>
           <span className="font-display text-lg font-bold tracking-wide">
-            Orbitask
+            JehaToDo
           </span>
         </div>
 
         <div className="relative max-w-md">
           <h1 className="font-display text-4xl font-bold leading-[1.1] lg:text-6xl">
-            Organize the noise.
+            Jeha.
             <br />
-            <span className="text-ash">Move with intent.</span>
+            <span className="text-ash">Ji Iya.</span>
           </h1>
           <p className="mt-5 max-w-sm leading-relaxed text-ash">
-            Kelola fokus, tugas, dan ritme harianmu dalam satu orbit yang
-            tenang — tanpa distraksi, tanpa kebisingan.
+            Jangan Lupa ToDo ta MasBro, Nda kutau apa lagi mau ku tulis pokokna hantam saja!
           </p>
-        </div>
-
-        {/* Floating productivity card — dekorasi branding */}
-        <div className="relative hidden w-fit animate-floaty items-center gap-5 rounded-card border border-line bg-moss/80 p-5 backdrop-blur sm:flex">
-          <ProgressRing value={82} size={64} stroke={6} label="Fokus mingguan 82 persen" />
-          <dl className="space-y-1.5 text-sm">
-            <div className="flex items-baseline gap-2">
-              <dt className="font-display text-2xl font-bold text-lime">07</dt>
-              <dd className="text-ash">tugas hari ini</dd>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <dt className="font-display text-lg font-bold text-lavender">
-                82%
-              </dt>
-              <dd className="text-ash">fokus mingguan</dd>
-            </div>
-          </dl>
         </div>
       </section>
 
@@ -119,9 +100,9 @@ export default function LoginPage() {
           className="w-full max-w-sm animate-rise space-y-5"
         >
           <div>
-            <h2 className="font-display text-3xl font-bold">Welcome back</h2>
+            <h2 className="font-display text-3xl font-bold">Halo Jeha!</h2>
             <p className="mt-1.5 text-sm text-ash">
-              Masuk untuk melanjutkan orbit produktivitasmu.
+              Masuk mas Jeha!
             </p>
           </div>
 
