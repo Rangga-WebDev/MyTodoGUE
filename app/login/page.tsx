@@ -188,7 +188,7 @@ export default function LoginPage() {
           </Button>
 
           <p className="text-center text-xs leading-relaxed text-ash">
-            Aplikasi pribadi — pendaftaran akun baru dinonaktifkan.
+            Aplikasi Pribadinya Mas JEHAH.
           </p>
         </form>
       </section>
