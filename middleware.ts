@@ -42,11 +42,11 @@ export async function middleware(request: NextRequest) {
     url.pathname = "/";
     return NextResponse.redirect(url);
   }
-  
+
   return supabaseResponse;
 }
 
 export const config = {
   // Jalankan middleware di semua path KECUALI aset statis
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };
