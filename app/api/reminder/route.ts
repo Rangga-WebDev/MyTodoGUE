@@ -1,27 +1,27 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { formatTanggal, todayWIB } from "@/lib/date";
+import { daysAgoWIB, formatTanggal, todayWIB } from "@/lib/date";
 
-// Dipanggil Vercel Cron tiap pagi — bukan lewat browser/middleware.
-// Keamanan pakai CRON_SECRET, data pakai service role (melewati RLS secara sah).
 export const dynamic = "force-dynamic";
 
 const PRIORITY_ICON: Record<number, string> = { 1: "🔴", 2: "🟡", 3: "⚪" };
 
-// Judul tugas = input bebas — wajib di-escape agar tidak merusak/menyuntik HTML
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// "kumpul laporan (jam 14.00)" bila ada jam, tanpa embel-embel bila tidak
+function judulDenganJam(title: string, due_time: string | null): string {
+  const jam = due_time ? ` (jam ${String(due_time).slice(0, 5)})` : "";
+  return `${escapeHtml(title)}${jam}`;
+}
+
 export async function GET(request: Request) {
-  // 1. Verifikasi pemanggil — Vercel Cron otomatis mengirim
-  //    "Authorization: Bearer <CRON_SECRET>" jika env var itu ada
   const auth = request.headers.get("authorization");
   if (!process.env.CRON_SECRET || auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // 2. Client admin — service role key HANYA boleh hidup di server
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -29,44 +29,70 @@ export async function GET(request: Request) {
   );
 
   const today = todayWIB();
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("title, due_date, priority")
-    .eq("is_done", false)
-    .or(`due_date.lte.${today},due_date.is.null`)
-    .order("priority", { ascending: true })
-    .order("created_at", { ascending: true });
+  const besok = daysAgoWIB(-1);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  // Dua query paralel: (1) hari ini + terlambat + tanpa tanggal, (2) besok
+  const [hariIniRes, besokRes] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select("title, due_date, due_time, priority")
+      .eq("is_done", false)
+      .or(`due_date.lte.${today},due_date.is.null`)
+      .order("priority", { ascending: true })
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("tasks")
+      .select("title, due_time")
+      .eq("is_done", false)
+      .eq("due_date", besok)
+      .order("priority", { ascending: true }),
+  ]);
+
+  if (hariIniRes.error || besokRes.error) {
+    return NextResponse.json(
+      { error: (hariIniRes.error ?? besokRes.error)!.message },
+      { status: 500 }
+    );
   }
 
-  const tasks = data ?? [];
+  const tasks = hariIniRes.data ?? [];
+  const tugasBesok = besokRes.data ?? [];
   const appUrl = process.env.APP_URL ?? "";
 
-  // 3. Susun pesan
-  let text: string;
+  // ---- Susun pesan ----
+  const lines: string[] = [];
+
   if (tasks.length === 0) {
-    text = `☀️ <b>Pagi MasBro!</b>\nTidak ada tugas untuk hari ini. Nikmati harimu 🎉`;
+    lines.push("☀️ <b>Pagi MasBro!</b>", "Tidak ada tugas untuk hari ini 🎉");
   } else {
     const overdue = tasks.filter((t) => t.due_date && t.due_date < today);
     const sisa = tasks.filter((t) => !(t.due_date && t.due_date < today));
 
-    const lines = [`☀️ <b>Tugasmu hari ini (${formatTanggal(today)}):</b>`, ""];
+    lines.push(`☀️ <b>Tugasmu hari ini (${formatTanggal(today)}):</b>`, "");
     for (const t of overdue) {
       lines.push(
-        `❗ <b>Terlambat:</b> ${escapeHtml(t.title)} (sejak ${formatTanggal(t.due_date!)})`
+        `❗ <b>Terlambat:</b> ${judulDenganJam(t.title, t.due_time)} (sejak ${formatTanggal(t.due_date!)})`
       );
     }
     for (const t of sisa) {
-      lines.push(`${PRIORITY_ICON[t.priority] ?? "🟡"} ${escapeHtml(t.title)}`);
+      lines.push(
+        `${PRIORITY_ICON[t.priority] ?? "🟡"} ${judulDenganJam(t.title, t.due_time)}`
+      );
     }
     lines.push("", `Total ${tasks.length} tugas aktif hari ini.`);
-    if (appUrl) lines.push(appUrl);
-    text = lines.join("\n");
   }
 
-  // 4. Kirim ke Telegram
+  // Seksi D-1 — pemanasan untuk deadline besok
+  if (tugasBesok.length > 0) {
+    lines.push("", "⏰ <b>Besok deadline:</b>");
+    for (const t of tugasBesok) {
+      lines.push(`• ${judulDenganJam(t.title, t.due_time)}`);
+    }
+  }
+
+  if (appUrl) lines.push("", appUrl);
+
+  // ---- Kirim ----
   const res = await fetch(
     `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
     {
@@ -74,7 +100,7 @@ export async function GET(request: Request) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: process.env.TELEGRAM_CHAT_ID,
-        text,
+        text: lines.join("\n"),
         parse_mode: "HTML",
         disable_web_page_preview: true,
       }),
@@ -85,5 +111,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: `Telegram: ${tg.description}` }, { status: 502 });
   }
 
-  return NextResponse.json({ ok: true, taskCount: tasks.length });
+  return NextResponse.json({
+    ok: true,
+    hariIni: tasks.length,
+    besok: tugasBesok.length,
+  });
 }
